@@ -1,5 +1,5 @@
 /** Formato de fechas en español (Perú). Las fechas del contrato llegan como ISO 8601. */
-import { format, formatDistanceToNowStrict, isValid, parseISO, startOfDay } from 'date-fns'
+import { format, formatDistanceStrict, formatDistanceToNowStrict, isValid, parseISO, startOfDay } from 'date-fns'
 import { es } from 'date-fns/locale'
 
 export function aFecha(valor: string | number | Date | null | undefined): Date | null {
@@ -29,6 +29,24 @@ export function formatoRelativo(valor: string | number | Date | null | undefined
 export function formatoAbsoluto(valor: string | number | Date | null | undefined): string {
   const d = aFecha(valor)
   return d ? format(d, "dd MMM yyyy '·' HH:mm:ss", { locale: es }) : ''
+}
+
+/** "16 sep 2026 · 14:03" (sin segundos: fechas de atención, vencimientos). */
+export function formatoAbsolutoCorto(valor: string | number | Date | null | undefined): string {
+  const d = aFecha(valor)
+  return d ? format(d, "dd MMM yyyy '·' HH:mm", { locale: es }) : ''
+}
+
+/** "16 sep 2026". */
+export function formatoFechaCorta(valor: string | number | Date | null | undefined): string {
+  const d = aFecha(valor)
+  return d ? format(d, 'dd MMM yyyy', { locale: es }) : ''
+}
+
+/** "en 12 días", "en 3 horas"; si ya pasó, "hace 2 días". Vacío si la fecha es inválida. */
+export function formatoHastaRelativo(valor: string | number | Date | null | undefined, ahora: Date = new Date()): string {
+  const d = aFecha(valor)
+  return d ? formatDistanceStrict(d, ahora, { addSuffix: true, locale: es }) : ''
 }
 
 /** "14:03:27". */

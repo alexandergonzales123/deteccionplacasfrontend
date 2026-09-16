@@ -2,7 +2,7 @@ import { forwardRef, type ButtonHTMLAttributes } from 'react'
 import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/cn'
 
-type Variante = 'primario' | 'secundario' | 'fantasma' | 'peligro'
+type Variante = 'primario' | 'secundario' | 'fantasma' | 'peligro' | 'exito'
 type Tamano = 'sm' | 'md' | 'lg'
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -16,6 +16,8 @@ const VARIANTES: Record<Variante, string> = {
   secundario: 'border border-border bg-panel text-fg hover:bg-panelHover',
   fantasma: 'text-fgMuted hover:bg-panelHover hover:text-fg',
   peligro: 'bg-danger text-white hover:bg-danger/90 font-semibold',
+  // Acciones de cierre positivo ("Marcar revisada").
+  exito: 'bg-ok text-app hover:bg-ok/90 font-semibold',
 }
 
 // CA-12: controles táctiles de al menos 44 px en lg (vista móvil).

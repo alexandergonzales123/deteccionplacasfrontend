@@ -8,6 +8,7 @@ const TONOS: Record<TonoBadge, string> = {
   danger: 'bg-danger/15 text-danger',
   muted: 'bg-fgMuted/10 text-fgMuted',
   primary: 'bg-primary/15 text-primary',
+  violeta: 'bg-violet-500/15 text-violet-400',
 }
 
 interface Props extends HTMLAttributes<HTMLSpanElement> {
