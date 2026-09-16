@@ -42,6 +42,31 @@ export function formatoFechaLarga(valor: Date): string {
   return format(valor, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })
 }
 
+/** "20 s", "45 min", "3 h 12 min", "2 d 5 h". Para antigüedades y uptime. */
+export function formatoDuracion(segundos: number): string {
+  const s = Math.max(0, Math.floor(segundos))
+  if (s < 60) return `${s} s`
+  const min = Math.floor(s / 60)
+  if (min < 60) return `${min} min`
+  const h = Math.floor(min / 60)
+  const m = min % 60
+  if (h < 24) return m > 0 ? `${h} h ${m} min` : `${h} h`
+  const d = Math.floor(h / 24)
+  const hr = h % 24
+  return hr > 0 ? `${d} d ${hr} h` : `${d} d`
+}
+
+/** Valor para `<input type="datetime-local">` ("2026-09-16T14:03") en hora local. */
+export function aDatetimeLocal(valor: Date): string {
+  return format(valor, "yyyy-MM-dd'T'HH:mm")
+}
+
+/** Segundos transcurridos desde `valor` hasta `ahora`; null si la fecha es inválida. */
+export function segundosDesde(valor: string | number | Date | null | undefined, ahora: Date = new Date()): number | null {
+  const d = aFecha(valor)
+  return d ? Math.max(0, Math.round((ahora.getTime() - d.getTime()) / 1000)) : null
+}
+
 /** Clave estable del día local ("2026-09-16"): sirve para memoizar por día. */
 export function claveDia(fecha: Date): string {
   return format(fecha, 'yyyy-MM-dd')

@@ -51,10 +51,11 @@ export async function ingestarDeteccion(
  * GET /detecciones/{deteccionId}/imagen · rol mínimo: operador. Auditada.
  * 404 no existe · 410 purgada por retención. Devuelve el JPEG como Blob.
  */
-export async function descargarImagenDeteccion(deteccionId: string): Promise<Blob> {
+export async function descargarImagenDeteccion(deteccionId: string, signal?: AbortSignal): Promise<Blob> {
   const { data } = await http.get<Blob>(`/detecciones/${encodeURIComponent(deteccionId)}/imagen`, {
     responseType: 'blob',
     headers: { Accept: 'image/jpeg' },
+    signal,
   })
   return data
 }

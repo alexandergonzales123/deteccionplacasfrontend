@@ -5,6 +5,7 @@ import { RouterProvider } from 'react-router-dom'
 import { AuthProvider } from '@/auth/AuthContext'
 import { statusDe } from '@/api/client'
 import { router } from '@/router'
+import 'leaflet/dist/leaflet.css'
 import './index.css'
 
 const queryClient = new QueryClient({

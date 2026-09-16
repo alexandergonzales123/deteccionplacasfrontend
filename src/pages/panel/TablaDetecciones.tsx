@@ -6,17 +6,11 @@
  */
 import { MapPin } from 'lucide-react'
 import type { Deteccion } from '@/api/types'
-import { Badge, Chip, Skeleton, Table, TBody, Td, Th, THead, Tr } from '@/components/ui'
+import { ChipConfianza } from '@/components/ChipConfianza'
+import { Badge, Skeleton, Table, TBody, Td, Th, THead, Tr } from '@/components/ui'
 import { cn } from '@/lib/cn'
-import { nivelConfianza, porcentajeConfianza, type NivelConfianza } from '@/lib/confianza'
 import { formatoAbsoluto, formatoRelativo } from '@/lib/fechas'
 import { formatearPlaca } from '@/lib/placas'
-
-const TONO_CONFIANZA: Record<NivelConfianza, 'ok' | 'warn' | 'danger'> = {
-  alta: 'ok',
-  media: 'warn',
-  baja: 'danger',
-}
 
 interface Props {
   detecciones: Deteccion[]
@@ -38,7 +32,6 @@ export function TablaDetecciones({ detecciones, ahora }: Props) {
       </THead>
       <TBody>
         {detecciones.map((d) => {
-          const nivel = nivelConfianza(d.confianza)
           return (
             <Tr
               key={d.id}
@@ -69,7 +62,7 @@ export function TablaDetecciones({ detecciones, ahora }: Props) {
                 </time>
               </Td>
               <Td>
-                <Chip tono={TONO_CONFIANZA[nivel]}>{porcentajeConfianza(d.confianza)}</Chip>
+                <ChipConfianza confianza={d.confianza} />
               </Td>
               <Td className="text-right">
                 {d.generoAlerta ? <Badge tono="danger" solido>Alerta</Badge> : null}

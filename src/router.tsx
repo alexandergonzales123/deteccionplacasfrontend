@@ -10,6 +10,9 @@ import { EnConstruccionPage } from '@/pages/EnConstruccionPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { NoEncontradoPage } from '@/pages/NoEncontradoPage'
 import { PanelEnVivoPage } from '@/pages/panel/PanelEnVivoPage'
+import { BusquedaPlacaPage } from '@/pages/busqueda/BusquedaPlacaPage'
+import { CamarasPage } from '@/pages/camaras/CamarasPage'
+import { CamaraDetallePage } from '@/pages/camaras/CamaraDetallePage'
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -31,7 +34,7 @@ export const router = createBrowserRouter([
             path: '/busqueda',
             element: (
               <RequireRol minimo="operador">
-                <EnConstruccionPage titulo="Búsqueda por placa" subtitulo="Historial de avistamientos y última ubicación" />
+                <BusquedaPlacaPage />
               </RequireRol>
             ),
           },
@@ -39,7 +42,15 @@ export const router = createBrowserRouter([
             path: '/camaras',
             element: (
               <RequireRol minimo="visor">
-                <EnConstruccionPage titulo="Cámaras" subtitulo="Registro y salud de los puntos de captura" />
+                <CamarasPage />
+              </RequireRol>
+            ),
+          },
+          {
+            path: '/camaras/:camaraId',
+            element: (
+              <RequireRol minimo="visor">
+                <CamaraDetallePage />
               </RequireRol>
             ),
           },
