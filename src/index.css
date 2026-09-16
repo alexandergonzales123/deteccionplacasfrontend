@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    @apply bg-app font-sans text-fg antialiased;
+  }
+
+  ::selection {
+    @apply bg-primary/30 text-fg;
+  }
+
+  /* Scrollbar discreta acorde al tema oscuro */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #1a2536 transparent;
+  }
+}
