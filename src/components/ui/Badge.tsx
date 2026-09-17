@@ -1,7 +1,7 @@
 import type { HTMLAttributes } from 'react'
 import { cn } from '@/lib/cn'
 
-export type TonoBadge = 'ok' | 'warn' | 'danger' | 'muted' | 'primary'
+export type TonoBadge = 'ok' | 'warn' | 'danger' | 'muted' | 'primary' | 'violeta'
 
 const TONOS: Record<TonoBadge, string> = {
   ok: 'bg-ok/15 text-ok border-ok/30',
@@ -9,6 +9,8 @@ const TONOS: Record<TonoBadge, string> = {
   danger: 'bg-danger/15 text-danger border-danger/30',
   muted: 'bg-fgMuted/10 text-fgMuted border-fgMuted/30',
   primary: 'bg-primary/15 text-primary border-primary/30',
+  // Motivo "orden judicial" del watchlist.
+  violeta: 'bg-violet-500/15 text-violet-400 border-violet-500/30',
 }
 
 interface Props extends HTMLAttributes<HTMLSpanElement> {

@@ -57,16 +57,19 @@ src/
     auth.ts, camaras.ts, detecciones.ts, placas.ts,
     watchlist.ts, alertas.ts, auditoria.ts, configuracion.ts
   auth/           Sesión: AuthContext/useAuth, persistencia, RequireAuth, RequireRol, permisos
-  components/ui/  Componentes genéricos (Card, Badge, Chip, Button, Input, Select, Table, Skeleton, EmptyState, Modal)
-  components/     ChipConfianza (semáforo de confianza) y mapa/MapaAvistamientos (Leaflet, tema oscuro, marcadores numerados)
-  hooks/          Hooks compartidos (alertas nuevas, reloj) y claves de react-query
+  components/ui/  Componentes genéricos (Card, Badge, Chip, Button, Input, Select, Textarea, Table, Skeleton, EmptyState, Modal)
+  components/     ChipConfianza (semáforo de confianza), ChipMotivo (motivo de watchlist), BadgeEstadoAlerta,
+                  EvidenciaDeteccion (imagen con bearer) y mapa/MapaAvistamientos (Leaflet, tema oscuro)
+  hooks/          Hooks compartidos (alertas nuevas, reloj, imagen de detección) y claves de react-query
   layout/         AppShell (sidebar + contenido), Sidebar, PageHeader, definición de la navegación
-  lib/            Utilidades puras: fechas, placas, confianza, frescura, iniciales
+  lib/            Utilidades puras: fechas, placas, confianza, frescura, watchlist (motivos, vencimiento), iniciales
   pages/          Una carpeta o archivo por pantalla
     LoginPage.tsx
     panel/        Panel en vivo (CU-02)
     busqueda/     Búsqueda por placa y última ubicación (CU-03, CU-04)
     camaras/      Listado, alta/edición/baja y detalle de cámaras (CU-07, CU-08, CU-09)
+    watchlist/    Lista de vigilancia: alta, listado y retiro (CU-05)
+    alertas/      Bandeja de alertas, detalle y atención (CU-06)
     EnConstruccionPage.tsx, NoEncontradoPage.tsx
   router.tsx      Rutas y roles mínimos por pantalla
   main.tsx        Arranque: QueryClient, AuthProvider, RouterProvider
@@ -98,12 +101,18 @@ La jerarquía de roles del contrato es `visor < operador < supervisor < admin`. 
 | `/busqueda`           | operador   | CU-03, CU-04 | Búsqueda exacta → difusa (3a) → vacío con retención (4a). Comodines `?`/`*` van directo a `/placas/buscar`. Mapa de recorrido + línea de tiempo con frescura (CA-06). Evidencia vía `GET /detecciones/{id}/imagen` (410 = purgada). Solo se consulta al pulsar **Buscar** con motivo declarado (CA-04); `placa`, `desde`, `hasta` van en la URL, el motivo no. |
 | `/camaras`            | visor      | CU-07, CU-09 | Stats + tabla con polling 30 s; filtro `?estado=`. Alta/edición/baja solo admin. La `apiKey` del alta se muestra una única vez en un modal bloqueante (CA-14). |
 | `/camaras/:camaraId`  | visor      | CU-08        | Detalle con polling 15 s. Sin endpoint de streaming en el contrato: placeholder; cámara `inactiva` muestra desconexión con último heartbeat (2a). Últimas detecciones solo para operador+. |
+| `/watchlist`          | operador   | CU-05        | Tabla paginada por cursor ("Cargar más"), polling 60 s; filtros `?motivo=` y `?activo=false` (retiradas). Alta en línea y retiro (baja lógica) solo supervisor+; el operador ve el aviso "Solo un supervisor puede agregar placas". Una misma placa puede figurar con varios motivos (1a); `venceEn` se envía en ISO o `null` y las entradas vencidas se marcan "Vencida" en cliente (3a, CA-07). La placa enlaza a `/busqueda?placa=` sin motivo (el operador lo declara allí). |
+| `/alertas`            | operador   | CU-06        | Pestañas `?estado=nueva\|revisada\|descartada\|todas` (por defecto Nuevas, con el contador del badge de la nav); rango `?desde`/`?hasta` opcional; cursor con "Cargar más". Polling 15 s solo en Nuevas. Cards con acciones: Ver evidencia, Descartar y Marcar revisada (modal con evidencia embebida, aviso R-05 y comentario obligatorio ≤500); Reabrir solo supervisor+ (3a, CA-13). Cada `PATCH` invalida `['alertas']` (lista, detalle y badge). |
+| `/alertas/:alertaId`  | operador   | CU-06        | Detalle con detección completa (OCR vs normalizada, `capturadaEn`/`recibidaEn`, cámara con enlace), evidencia embebida, mapa y las mismas acciones. 404 → "Alerta no encontrada". |
 
-Watchlist, Alertas y Auditoría siguen como marcadores de posición.
+Auditoría sigue como marcador de posición.
 
 ### Supuestos y huecos del contrato (`TODO(contrato)`)
 
 - No hay endpoint de stream/preview ni de reinicio remoto de cámara: la vista previa es un placeholder y se omite "Reiniciar cámara".
 - `umbralInactividadSegundos` no se expone por API; el cliente usa 180 s para colorear el último heartbeat.
 - `GET /camaras` no devuelve conteo total: se pagina por cursor (máximo 5 páginas de 200) y se cuenta en cliente.
+- No hay endpoint de conteo de alertas: "Nuevas · N" y el badge de la nav listan `estado=nueva&limite=200` y cuentan en cliente ("N+" si hay más páginas).
+- No hay `GET /watchlist/{id}`: el detalle de alerta muestra `watchlistId` sin enlace.
+- El vencimiento del watchlist se calcula en cliente (`venceEn <= ahora`); el backend decide si esas entradas siguen con `activo=true`.
 - Los mapas usan tiles públicos de OpenStreetMap; en intranet hay que servir tiles propios (`TODO(despliegue)`).

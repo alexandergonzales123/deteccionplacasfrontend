@@ -1,5 +1,16 @@
 /** Claves de react-query centralizadas para poder invalidar por familia. */
-import type { EstadoCamara } from '@/api/types'
+import type { EstadoAlerta, EstadoCamara, MotivoWatchlist } from '@/api/types'
+
+export interface FiltrosListaAlertas {
+  estado?: EstadoAlerta
+  desde?: string
+  hasta?: string
+}
+
+export interface FiltrosListaWatchlist {
+  motivo?: MotivoWatchlist
+  activo: boolean
+}
 
 export const qk = {
   detecciones: {
@@ -22,10 +33,17 @@ export const qk = {
   },
   alertas: {
     todas: ['alertas'] as const,
+    /** Conteo del badge de la nav (GET /alertas?estado=nueva&limite=200). */
     nuevas: ['alertas', 'nuevas'] as const,
+    /** Listado paginado por cursor con los filtros del contrato. */
+    lista: (f: FiltrosListaAlertas) =>
+      ['alertas', 'lista', f.estado ?? 'todas', f.desde ?? '', f.hasta ?? ''] as const,
+    detalle: (alertaId: string) => ['alertas', 'detalle', alertaId] as const,
   },
   watchlist: {
     todas: ['watchlist'] as const,
+    /** Conteo de la stat card del panel (activo=true, limite=200). */
     activas: ['watchlist', 'activas'] as const,
+    lista: (f: FiltrosListaWatchlist) => ['watchlist', 'lista', f.motivo ?? 'todos', f.activo] as const,
   },
 }

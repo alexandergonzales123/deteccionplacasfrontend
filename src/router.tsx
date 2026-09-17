@@ -13,6 +13,9 @@ import { PanelEnVivoPage } from '@/pages/panel/PanelEnVivoPage'
 import { BusquedaPlacaPage } from '@/pages/busqueda/BusquedaPlacaPage'
 import { CamarasPage } from '@/pages/camaras/CamarasPage'
 import { CamaraDetallePage } from '@/pages/camaras/CamaraDetallePage'
+import { WatchlistPage } from '@/pages/watchlist/WatchlistPage'
+import { AlertasPage } from '@/pages/alertas/AlertasPage'
+import { AlertaDetallePage } from '@/pages/alertas/AlertaDetallePage'
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -55,10 +58,11 @@ export const router = createBrowserRouter([
             ),
           },
           {
+            // GET /watchlist: operador. Alta/retiro (supervisor) se resuelven dentro de la página.
             path: '/watchlist',
             element: (
               <RequireRol minimo="operador">
-                <EnConstruccionPage titulo="Watchlist" subtitulo="Vehículos de interés bajo vigilancia" />
+                <WatchlistPage />
               </RequireRol>
             ),
           },
@@ -66,7 +70,15 @@ export const router = createBrowserRouter([
             path: '/alertas',
             element: (
               <RequireRol minimo="operador">
-                <EnConstruccionPage titulo="Alertas" subtitulo="Coincidencias entre detecciones y watchlist" />
+                <AlertasPage />
+              </RequireRol>
+            ),
+          },
+          {
+            path: '/alertas/:alertaId',
+            element: (
+              <RequireRol minimo="operador">
+                <AlertaDetallePage />
               </RequireRol>
             ),
           },

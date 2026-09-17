@@ -13,12 +13,15 @@ const JERARQUIA: Record<Rol, number> = {
   admin: 3,
 }
 
+/** Valida contra el enum antes de indexar (un valor como "toString" no debe resolver al prototipo). */
+export function esRol(v: string | null | undefined): v is Rol {
+  return v !== null && v !== undefined && Object.prototype.hasOwnProperty.call(JERARQUIA, v)
+}
+
 export function tienePermiso(rol: Rol | null | undefined, rolMinimo: Rol): boolean {
-  if (!rol) return false
-  const nivel = JERARQUIA[rol]
   // Un rol fuera del enum (backend desalineado) no tiene permiso alguno.
-  if (nivel === undefined) return false
-  return nivel >= JERARQUIA[rolMinimo]
+  if (!esRol(rol)) return false
+  return JERARQUIA[rol] >= JERARQUIA[rolMinimo]
 }
 
 export const ETIQUETA_ROL: Record<Rol, string> = {
@@ -30,5 +33,5 @@ export const ETIQUETA_ROL: Record<Rol, string> = {
 
 /** Etiqueta legible del rol; "desconocido" si viene fuera del enum del contrato. */
 export function etiquetaRol(rol: Rol | string | null | undefined): string {
-  return (rol && ETIQUETA_ROL[rol as Rol]) || 'desconocido'
+  return esRol(rol) ? ETIQUETA_ROL[rol] : 'desconocido'
 }
