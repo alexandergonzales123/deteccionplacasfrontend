@@ -44,7 +44,8 @@ function Dato({ etiqueta, children, className }: { etiqueta: string; children: R
 function textoTecnico(c: CamaraDetalle): string {
   const partes: string[] = []
   if (c.resolucion) partes.push(c.resolucion.replace(/x/i, '×'))
-  if (c.fps !== undefined) partes.push(`${c.fps} fps`)
+  // `!= null`: el backend envía `null` (no omite) en los opcionales sin valor.
+  if (c.fps != null) partes.push(`${c.fps} fps`)
   return partes.join(' · ')
 }
 
@@ -249,7 +250,7 @@ export function CamaraDetallePage() {
                 </Dato>
                 <Dato etiqueta="Tipo de lente">
                   {etiquetaLente(c.tipoLente)}
-                  {c.distanciaFocalMm !== undefined ? <span className="text-fgMuted"> · {c.distanciaFocalMm} mm</span> : null}
+                  {c.distanciaFocalMm != null ? <span className="text-fgMuted"> · {c.distanciaFocalMm} mm</span> : null}
                 </Dato>
                 <Dato etiqueta="Resolución" className="font-mono">
                   {c.resolucion ? c.resolucion.replace(/x/i, '×') : '—'}

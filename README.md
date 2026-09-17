@@ -44,6 +44,62 @@ Usuarios (contraseña `centinela`): `admin@`, `supervisor@`, `operador@` y
 `visor@munidemo.gob.pe`. La placa `AKQ-198` tiene un recorrido de 4 puntos y
 está en el watchlist; `AKO-198` sirve para probar la búsqueda difusa.
 
+### Contra el backend real
+
+El backend FastAPI vive en `BACK/deteccionplacasbackend` (ver su `README.md`
+para la instalación inicial: `alembic upgrade head` y `python -m scripts.seed`).
+Con el entorno ya creado y sembrado:
+
+```bash
+# terminal 1 · API en http://localhost:8000/api/v1 (docs en /api/v1/docs)
+cd BACK/deteccionplacasbackend && .venv/Scripts/activate && uvicorn app.main:app --reload --port 8000
+
+# terminal 2 · tránsito en vivo: heartbeats y detecciones con JPEG desde las 6 cámaras activas de la semilla
+cd BACK/deteccionplacasbackend && .venv/Scripts/activate && python -m scripts.simular_edge
+
+# terminal 3 · front
+cd FRONT/deteccionplacasfrontend && npm run dev
+```
+
+`.env` del front: `VITE_API_BASE_URL=http://localhost:8000/api/v1` (es el valor
+por defecto, así que basta con no sobreescribirlo). El backend permite CORS
+desde `http://localhost:5173` por defecto (`CORS_ORIGENES`).
+
+Usuarios de demostración (contraseña `centinela`):
+
+| Email | Rol |
+| --- | --- |
+| `admin@munidemo.gob.pe` | admin |
+| `supervisor@munidemo.gob.pe` | supervisor |
+| `operador@munidemo.gob.pe` | operador |
+| `visor@munidemo.gob.pe` | visor |
+
+Sin `simular_edge` ni dispositivos reales, la tarea de inactividad del backend
+(CA-11) pasa las cámaras `activa` a `inactiva` a los 300 s sin heartbeat: es lo
+esperado, no un fallo del front.
+
+Diferencias respecto al mock (`mock/api.mjs`) que conviene conocer:
+
+- **Cursores opacos**: todos los listados, incluido `GET /placas/{placa}/eventos`,
+  paginan con un cursor `base64url` de `{"t": iso, "id": uuid}`, no con el id de
+  la última detección. El front ya lo trata como opaco (`siguienteCursor` se
+  reenvía tal cual).
+- **El refresh token rota**: cada `POST /auth/refresh` revoca el anterior y
+  devuelve un par nuevo. El interceptor de `src/api/client.ts` reutiliza el par
+  guardado por otra pestaña si su propio refresh fue rechazado.
+- **La evidencia es un JPEG real**: `GET /detecciones/{id}/imagen` devuelve el
+  recorte enviado por el edge (410 `IMAGEN_PURGADA` tras la retención).
+  `imagenUrl` llega como ruta relativa (`/api/v1/detecciones/{id}/imagen`) y
+  nunca se usa como `<img src>`; se descarga por id con bearer.
+- **Campos `null` explícitos**: el backend serializa `null` en los opcionales
+  sin valor (`ultimoHeartbeat`, `atendidaPor`, `ipOrigen`, `notas`, etc.) en vez
+  de omitirlos; los tipos de `src/api/types.ts` lo reflejan.
+- **Acción `purga_ejecutada`** en auditoría: no está en el enum del contrato,
+  la registra la purga programada (CU-11) con el usuario sintético "Sistema"
+  (`id` `00000000-0000-0000-0000-000000000000`, rol `admin`).
+- Los 422 de validación llegan como `400 DATOS_INVALIDOS` con el esquema `Error`
+  del contrato; el login bloqueado responde `429 CUENTA_BLOQUEADA`.
+
 ## Variables de entorno
 
 Se leen en tiempo de build desde `.env` (ver `.env.example`).

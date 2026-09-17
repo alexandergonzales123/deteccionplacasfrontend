@@ -56,12 +56,16 @@ export interface CamaraRef {
   longitud: number
 }
 
+/**
+ * Los opcionales llevan `| null`: el backend serializa `null` en los campos
+ * sin valor en lugar de omitirlos (Pydantic con `exclude_none=False`).
+ */
 export interface Camara extends CamaraRef {
   estado: EstadoCamara
-  tipoLente?: TipoLente
-  distanciaFocalMm?: number
-  resolucion?: string
-  fps?: number
+  tipoLente?: TipoLente | null
+  distanciaFocalMm?: number | null
+  resolucion?: string | null
+  fps?: number | null
   ultimoHeartbeatEn?: string | null
   creadaEn?: string
 }
@@ -78,7 +82,8 @@ export interface HeartbeatInput {
 }
 
 export interface CamaraDetalle extends Camara {
-  ultimoHeartbeat?: HeartbeatInput
+  /** null mientras la cámara no haya enviado ningún heartbeat. */
+  ultimoHeartbeat?: HeartbeatInput | null
   deteccionesUltimas24h?: number
 }
 
@@ -140,7 +145,7 @@ export interface CandidataPlaca {
   distancia: number
   coincidenciaExacta: boolean
   avistamientos: number
-  ultimoAvistamientoEn?: string
+  ultimoAvistamientoEn?: string | null
   enWatchlist?: boolean
 }
 
@@ -164,7 +169,7 @@ export type MotivoWatchlist = 'robado' | 'requisitoriado' | 'moroso_papeletas' |
 export interface WatchlistItemInput {
   placa: string
   motivo: MotivoWatchlist
-  notas?: string
+  notas?: string | null
   /** Denuncia, oficio u orden que respalda la vigilancia. */
   referenciaExpediente: string
   venceEn?: string | null
@@ -175,7 +180,7 @@ export interface WatchlistItem extends WatchlistItemInput {
   placaNormalizada: string
   activo: boolean
   agregadoEn: string
-  agregadoPor?: Usuario
+  agregadoPor?: Usuario | null
 }
 
 // ---------------------------------------------------------------- Alertas ----
@@ -185,13 +190,14 @@ export type EstadoAlerta = 'nueva' | 'revisada' | 'descartada'
 export interface Alerta {
   id: string
   placaNormalizada: string
-  motivoWatchlist?: MotivoWatchlist
-  watchlistId?: string
+  /** null si la entrada de watchlist que originó la alerta ya no existe. */
+  motivoWatchlist?: MotivoWatchlist | null
+  watchlistId?: string | null
   deteccion: Deteccion
   estado: EstadoAlerta
   comentario?: string | null
   creadaEn: string
-  atendidaPor?: Usuario
+  atendidaPor?: Usuario | null
   atendidaEn?: string | null
 }
 
@@ -212,6 +218,12 @@ export type AccionAuditoria =
   | 'baja_watchlist'
   | 'cambio_estado_alerta'
   | 'cambio_retencion'
+  /**
+   * No está en el enum del contrato v0.2.0 pero sí en el DDL (sección 5.3 del
+   * documento de diseño): la registra la tarea de purga (CU-11) con el usuario
+   * sintético `{id: "00000000-…", nombre: "Sistema", rol: "admin"}`.
+   */
+  | 'purga_ejecutada'
 
 export interface RegistroAuditoria {
   id: string
@@ -219,7 +231,8 @@ export interface RegistroAuditoria {
   accion: AccionAuditoria
   placaConsultada?: string | null
   motivo?: string | null
-  ipOrigen?: string
+  /** null en acciones sin petición HTTP (p. ej. `purga_ejecutada`). */
+  ipOrigen?: string | null
   realizadaEn: string
 }
 

@@ -21,7 +21,8 @@ export const ETIQUETA_LENTE: Record<TipoLente, string> = {
   varifocal: 'Varifocal',
 }
 
-export function etiquetaLente(tipo: TipoLente | undefined): string {
+/** Acepta null: el backend serializa `null` cuando la cámara no lo declara. */
+export function etiquetaLente(tipo: TipoLente | null | undefined): string {
   return tipo ? (ETIQUETA_LENTE[tipo] ?? tipo) : '—'
 }
 

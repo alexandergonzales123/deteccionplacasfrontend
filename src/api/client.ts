@@ -4,6 +4,8 @@
  *  - adjunta `Authorization: Bearer <token>` en cada petición,
  *  - ante 401 intenta UNA renovación con `POST /auth/refresh` y reintenta,
  *  - si la renovación falla, limpia la sesión y avisa a la app (logout).
+ * El refresh token rota en cada uso (el backend revoca el anterior); ver
+ * `renovarToken` para el caso de varias pestañas renovando a la vez.
  */
 import axios, { AxiosError, type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios'
 import type { ApiError, LoginResponse } from './types'
@@ -63,6 +65,16 @@ async function renovarToken(): Promise<string> {
     sesionStorage.guardar(data)
     return data.token
   } catch (err) {
+    // El backend ROTA el refresh token: el primer uso lo revoca (401
+    // REFRESH_INVALIDO en el segundo). Si dos pestañas renuevan a la vez, la
+    // perdedora llega aquí, pero la ganadora ya guardó el par nuevo en
+    // localStorage (compartido): se reutiliza ese token en lugar de cerrar la
+    // sesión. Si el refresh guardado sigue siendo el que acabamos de usar, nadie
+    // renovó y la sesión no es recuperable.
+    const tokenDeOtraPestana = sesionStorage.leerToken()
+    if (tokenDeOtraPestana && sesionStorage.leerRefreshToken() !== refreshToken) {
+      return tokenDeOtraPestana
+    }
     // Se expira aquí (una vez) y no en cada petición que esperaba el refresh.
     expirarSesion()
     throw err
