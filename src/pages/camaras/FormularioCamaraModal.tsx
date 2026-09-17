@@ -53,9 +53,10 @@ function desdeCamara(c: Camara): Campos {
     longitud: String(c.longitud),
     estado: c.estado,
     tipoLente: c.tipoLente ?? '',
-    distanciaFocalMm: c.distanciaFocalMm !== undefined ? String(c.distanciaFocalMm) : '',
+    // `!= null`: el backend serializa `null` en los opcionales; String(null) rellenaría "null".
+    distanciaFocalMm: c.distanciaFocalMm != null ? String(c.distanciaFocalMm) : '',
     resolucion: c.resolucion ?? '',
-    fps: c.fps !== undefined ? String(c.fps) : '',
+    fps: c.fps != null ? String(c.fps) : '',
   }
 }
 

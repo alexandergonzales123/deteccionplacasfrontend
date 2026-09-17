@@ -50,6 +50,14 @@ export async function ingestarDeteccion(
 /**
  * GET /detecciones/{deteccionId}/imagen · rol mínimo: operador. Auditada.
  * 404 no existe · 410 purgada por retención. Devuelve el JPEG como Blob.
+ *
+ * `Deteccion.imagenUrl` llega del backend como ruta RELATIVA
+ * (`/api/v1/detecciones/{id}/imagen`, sin host) y el endpoint exige bearer, así
+ * que NUNCA debe usarse como `<img src>`: el navegador no adjuntaría el token
+ * (401) y además apuntaría al origen del front, no al de la API. Por eso la
+ * evidencia se descarga siempre por `id` con esta función (pasa por el
+ * interceptor de `client.ts`) y `imagenUrl` solo se consulta para saber si es
+ * `null` (purgada) y evitar la petición.
  */
 export async function descargarImagenDeteccion(deteccionId: string, signal?: AbortSignal): Promise<Blob> {
   const { data } = await http.get<Blob>(`/detecciones/${encodeURIComponent(deteccionId)}/imagen`, {

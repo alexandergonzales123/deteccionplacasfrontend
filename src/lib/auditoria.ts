@@ -5,7 +5,7 @@
 import type { AccionAuditoria, RegistroAuditoria } from '@/api/types'
 import { formatearPlaca } from './placas'
 
-/** Orden del enum del contrato. */
+/** Orden del enum del contrato; `purga_ejecutada` (DDL 5.3, tarea de purga CU-11) va al final. */
 export const ACCIONES_AUDITORIA: readonly AccionAuditoria[] = [
   'busqueda_placa',
   'consulta_avistamientos',
@@ -16,6 +16,7 @@ export const ACCIONES_AUDITORIA: readonly AccionAuditoria[] = [
   'baja_watchlist',
   'cambio_estado_alerta',
   'cambio_retencion',
+  'purga_ejecutada',
 ]
 
 export const ETIQUETA_ACCION: Record<AccionAuditoria, string> = {
@@ -28,6 +29,7 @@ export const ETIQUETA_ACCION: Record<AccionAuditoria, string> = {
   baja_watchlist: 'Baja de watchlist',
   cambio_estado_alerta: 'Cambio de estado de alerta',
   cambio_retencion: 'Cambio de retención',
+  purga_ejecutada: 'Purga de retención ejecutada',
 }
 
 /** Se valida contra el enum antes de indexar (un valor como "toString" no debe resolver al prototipo). */
