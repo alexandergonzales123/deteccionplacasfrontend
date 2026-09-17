@@ -27,3 +27,64 @@
     scrollbar-color: #1a2536 transparent;
   }
 }
+
+/* ---- Leaflet en tema oscuro -------------------------------------------- */
+/* Los tiles de OSM son claros: se invierten para integrarlos al tema. */
+.leaflet-container {
+  font-family: inherit;
+}
+.leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.6);
+}
+.leaflet-control-attribution {
+  background: rgba(8, 12, 20, 0.8) !important;
+  color: #5c6878 !important;
+  font-size: 10px;
+}
+.leaflet-control-attribution a {
+  color: #8b98a9 !important;
+}
+.leaflet-bar a {
+  background: #0d1420 !important;
+  color: #e6edf3 !important;
+  border-bottom-color: #1a2536 !important;
+}
+.leaflet-bar a:hover {
+  background: #111a29 !important;
+}
+.leaflet-tooltip {
+  background: #0d1420;
+  border: 1px solid #1a2536;
+  color: #e6edf3;
+  font-size: 12px;
+  box-shadow: none;
+}
+.leaflet-tooltip-top::before {
+  border-top-color: #1a2536;
+}
+
+/* Marcadores numerados (divIcon) del MapaAvistamientos */
+.marcador-punto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  background: #0d1420;
+  border: 2px solid #8b98a9;
+  color: #e6edf3;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 0 0 2px rgba(8, 12, 20, 0.9);
+}
+.marcador-punto--ultimo {
+  width: 34px;
+  height: 34px;
+  background: #00b4d8;
+  border-color: #e6edf3;
+  color: #080c14;
+  font-size: 13px;
+  box-shadow: 0 0 0 4px rgba(0, 180, 216, 0.3);
+}
