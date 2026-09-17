@@ -48,7 +48,7 @@ function fechaDeParam(valor: string | null, porDefecto: Date): string {
 function valoresIniciales(params: URLSearchParams): ValoresBusqueda {
   const ahora = new Date()
   return {
-    placa: normalizarPlaca(params.get('placa') ?? ''),
+    placa: formatearPlaca(normalizarPlaca(params.get('placa') ?? '')),
     desde: fechaDeParam(params.get('desde'), startOfDay(subDays(ahora, 1))),
     hasta: fechaDeParam(params.get('hasta'), ahora),
     motivo: '',
@@ -96,9 +96,9 @@ export function BusquedaPlacaPage() {
 
   const elegirCandidata = useCallback(
     (placaNormalizada: string) => {
-      const v = { ...valores, placa: placaNormalizada }
-      setValores(v)
-      buscar(v)
+      // El campo muestra la placa con guion; `buscar` recibe la normalizada.
+      setValores({ ...valores, placa: formatearPlaca(placaNormalizada) })
+      buscar({ ...valores, placa: placaNormalizada })
     },
     [valores, buscar],
   )

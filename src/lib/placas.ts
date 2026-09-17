@@ -26,6 +26,15 @@ export function normalizarPlaca(entrada: string): string {
   return entrada.toUpperCase().replace(/[^A-Z0-9?*]/g, '')
 }
 
+/**
+ * Limpia lo que el usuario está tecleando SIN quitar el guion, para que el campo
+ * muestre "C1H-884" tal como lo escribe. La normalización (sin guion) se aplica
+ * recién al enviar, con `normalizarPlaca`.
+ */
+export function limpiarEntradaPlaca(entrada: string): string {
+  return entrada.toUpperCase().replace(/[^A-Z0-9?*-]/g, '').replace(/-{2,}/g, '-')
+}
+
 export const PATRON_PLACA_NORMALIZADA = /^[A-Z0-9]{6,8}$/
 
 export function esPlacaNormalizadaValida(placa: string): boolean {

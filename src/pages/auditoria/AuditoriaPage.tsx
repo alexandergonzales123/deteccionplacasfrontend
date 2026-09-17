@@ -19,7 +19,7 @@ import { qk } from '@/hooks/queryKeys'
 import { PageHeader } from '@/layout/PageHeader'
 import { descargarArchivoTexto, esUuid, registrosACSV } from '@/lib/auditoria'
 import { aDatetimeLocalSegundos, aFecha, claveDia, formatoFechaCorta } from '@/lib/fechas'
-import { normalizarPlaca, PATRON_PLACA_NORMALIZADA } from '@/lib/placas'
+import { limpiarEntradaPlaca, normalizarPlaca, PATRON_PLACA_NORMALIZADA } from '@/lib/placas'
 import { CardConsultasDia } from './CardConsultasDia'
 import { CardRetencion } from './CardRetencion'
 import { ModalRetencion } from './ModalRetencion'
@@ -144,7 +144,7 @@ export function AuditoriaPage() {
   function aplicarFiltros(e: FormEvent) {
     e.preventDefault()
     const usuarioId = borrador.usuarioId.trim()
-    const placa = borrador.placa
+    const placa = normalizarPlaca(borrador.placa)
     const errs: ErroresFiltro = {}
     if (usuarioId && !esUuid(usuarioId)) errs.usuarioId = 'Debe ser un identificador con formato uuid.'
     if (placa && !PATRON_PLACA_NORMALIZADA.test(placa)) errs.placa = 'Entre 6 y 8 letras o números.'
@@ -277,7 +277,7 @@ export function AuditoriaPage() {
               maxLength={9}
               value={borrador.placa}
               onChange={(e) => {
-                setBorrador((b) => ({ ...b, placa: normalizarPlaca(e.target.value).replace(/[?*]/g, '') }))
+                setBorrador((b) => ({ ...b, placa: limpiarEntradaPlaca(e.target.value).replace(/[?*]/g, '') }))
                 if (erroresForm.placa) setErroresForm((p) => ({ ...p, placa: undefined }))
               }}
               error={erroresForm.placa ?? erroresUrl.placa}

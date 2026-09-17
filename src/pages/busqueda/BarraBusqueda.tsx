@@ -7,7 +7,7 @@ import { useState, type FormEvent, type ReactNode } from 'react'
 import { Search } from 'lucide-react'
 import { Button, Card, CardBody, Input } from '@/components/ui'
 import { aFecha } from '@/lib/fechas'
-import { normalizarPlaca, PATRON_PLACA_NORMALIZADA } from '@/lib/placas'
+import { limpiarEntradaPlaca, normalizarPlaca, PATRON_PLACA_NORMALIZADA } from '@/lib/placas'
 import { tieneComodines } from './ejecutarBusqueda'
 
 /** Rango del parámetro `Motivo` del contrato. */
@@ -59,11 +59,13 @@ export function BarraBusqueda({ valores, onCambiar, onBuscar, buscando, resumen 
 
   function alEnviar(e: FormEvent) {
     e.preventDefault()
-    const errPlaca = validarPlaca(valores.placa)
+    // El guion es solo presentación: la API recibe la placa normalizada.
+    const placa = normalizarPlaca(valores.placa)
+    const errPlaca = validarPlaca(placa)
     const errRango = validarRango(valores.desde, valores.hasta)
     setErrores({ placa: errPlaca ?? undefined, rango: errRango ?? undefined })
     if (errPlaca || errRango || !motivoValido) return
-    onBuscar({ ...valores, motivo: valores.motivo.trim() })
+    onBuscar({ ...valores, placa, motivo: valores.motivo.trim() })
   }
 
   return (
@@ -82,8 +84,8 @@ export function BarraBusqueda({ valores, onCambiar, onBuscar, buscando, resumen 
               maxLength={9}
               value={valores.placa}
               onChange={(e) => {
-                // Acepta guion y minúsculas; se normaliza al vuelo (la API solo recibe placa normalizada).
-                onCambiar({ ...valores, placa: normalizarPlaca(e.target.value) })
+                // Se conserva el guion mientras se escribe ("C1H-884"); se normaliza al enviar.
+                onCambiar({ ...valores, placa: limpiarEntradaPlaca(e.target.value) })
                 if (errores.placa) setErrores((prev) => ({ ...prev, placa: undefined }))
               }}
               error={errores.placa}

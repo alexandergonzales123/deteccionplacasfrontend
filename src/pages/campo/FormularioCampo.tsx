@@ -7,7 +7,7 @@ import { useId, useRef, useState, type FormEvent } from 'react'
 import { Search } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { cn } from '@/lib/cn'
-import { normalizarPlaca, PATRON_PLACA_NORMALIZADA } from '@/lib/placas'
+import { limpiarEntradaPlaca, normalizarPlaca, PATRON_PLACA_NORMALIZADA } from '@/lib/placas'
 
 /** Rango del parámetro `Motivo` del contrato. */
 const MOTIVO_MIN = 4
@@ -40,12 +40,14 @@ export function FormularioCampo({ valores, onCambiar, onConsultar, consultando }
 
   function alEnviar(e: FormEvent) {
     e.preventDefault()
-    if (!PATRON_PLACA_NORMALIZADA.test(valores.placa)) {
+    // El guion es solo presentación: la API recibe la placa normalizada.
+    const placa = normalizarPlaca(valores.placa)
+    if (!PATRON_PLACA_NORMALIZADA.test(placa)) {
       setErrorPlaca('La placa debe tener entre 6 y 8 letras o números.')
       return
     }
     if (!motivoValido) return
-    onConsultar({ placa: valores.placa, motivo: motivoLimpio })
+    onConsultar({ placa, motivo: motivoLimpio })
   }
 
   function usarMotivoRapido(texto: string) {
@@ -78,7 +80,7 @@ export function FormularioCampo({ valores, onCambiar, onConsultar, consultando }
           value={valores.placa}
           onChange={(e) => {
             // Acepta guion y minúsculas; se normaliza al vuelo. Sin comodines en campo.
-            onCambiar({ ...valores, placa: normalizarPlaca(e.target.value).replace(/[?*]/g, '') })
+            onCambiar({ ...valores, placa: limpiarEntradaPlaca(e.target.value).replace(/[?*]/g, '') })
             if (errorPlaca) setErrorPlaca(null)
           }}
           aria-invalid={errorPlaca ? true : undefined}

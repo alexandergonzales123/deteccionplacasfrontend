@@ -13,7 +13,7 @@ import type { MotivoWatchlist, WatchlistItemInput } from '@/api/types'
 import { Button, Card, CardBody, CardHeader, Input, Select, Textarea } from '@/components/ui'
 import { qk } from '@/hooks/queryKeys'
 import { aFecha } from '@/lib/fechas'
-import { formatearPlaca, normalizarPlaca, PATRON_PLACA_NORMALIZADA } from '@/lib/placas'
+import { formatearPlaca, limpiarEntradaPlaca, normalizarPlaca, PATRON_PLACA_NORMALIZADA } from '@/lib/placas'
 import { ETIQUETA_MOTIVO, MOTIVOS_WATCHLIST } from '@/lib/watchlist'
 
 const NOTAS_MAX = 500
@@ -33,7 +33,7 @@ const VACIO: Campos = { placa: '', motivo: 'robado', referenciaExpediente: '', v
 
 function validar(c: Campos): Errores {
   const e: Errores = {}
-  if (!PATRON_PLACA_NORMALIZADA.test(c.placa)) e.placa = 'Entre 6 y 8 letras o números.'
+  if (!PATRON_PLACA_NORMALIZADA.test(normalizarPlaca(c.placa))) e.placa = 'Entre 6 y 8 letras o números.'
   if (c.referenciaExpediente.trim().length === 0) e.referenciaExpediente = 'Indique la denuncia, oficio u orden que respalda la vigilancia.'
   if (c.venceEn) {
     const d = aFecha(c.venceEn)
@@ -46,7 +46,8 @@ function validar(c: Campos): Errores {
 
 function aInput(c: Campos): WatchlistItemInput {
   const body: WatchlistItemInput = {
-    placa: c.placa,
+    // El guion es solo presentación: la API recibe la placa normalizada.
+    placa: normalizarPlaca(c.placa),
     motivo: c.motivo,
     referenciaExpediente: c.referenciaExpediente.trim(),
     // null explícito: sin fecha de fin la vigilancia no caduca (CU-05 · 3a).
@@ -103,8 +104,8 @@ export function FormularioWatchlist() {
               placeholder="AKQ-198"
               maxLength={9}
               value={campos.placa}
-              // Acepta guion y minúsculas; la API solo recibe la placa normalizada.
-              onChange={(e) => set('placa', normalizarPlaca(e.target.value).replace(/[?*]/g, ''))}
+              // Se conserva el guion mientras se escribe; se normaliza al enviar.
+              onChange={(e) => set('placa', limpiarEntradaPlaca(e.target.value).replace(/[?*]/g, ''))}
               error={errores.placa}
               className="min-h-[44px]"
             />
