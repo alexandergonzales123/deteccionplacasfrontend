@@ -3,7 +3,17 @@
  * (tomado de las descripciones "Rol mínimo:" del contrato). Si el rol no
  * alcanza, el ítem no se muestra: evita llevar al usuario a un 403.
  */
-import { Activity, Bell, Camera, ClipboardList, Search, ShieldAlert, type LucideIcon } from 'lucide-react'
+import {
+  Activity,
+  Bell,
+  Camera,
+  ClipboardList,
+  Search,
+  ShieldAlert,
+  ShieldCheck,
+  Smartphone,
+  type LucideIcon,
+} from 'lucide-react'
 import type { Rol } from '@/api/types'
 import { tienePermiso } from '@/auth/permisos'
 
@@ -25,6 +35,18 @@ export const ITEMS_NAV: ItemNav[] = [
   { ruta: '/watchlist', etiqueta: 'Watchlist', icono: ShieldAlert, rolMinimo: 'operador' },
   { ruta: '/alertas', etiqueta: 'Alertas', icono: Bell, rolMinimo: 'operador', conBadgeAlertas: true },
   { ruta: '/auditoria', etiqueta: 'Auditoría', icono: ClipboardList, rolMinimo: 'admin' },
+]
+
+/**
+ * Enlaces discretos al pie del sidebar. No cuentan para `rutaInicioPorRol`:
+ * la vista de campo es un modo aparte y la política de retención es
+ * informativa (sección 8: transparencia).
+ */
+export const ITEMS_NAV_PIE: ItemNav[] = [
+  // GET /placas/buscar: operador (CU-12).
+  { ruta: '/campo', etiqueta: 'Consulta en campo', icono: Smartphone, rolMinimo: 'operador' },
+  // GET /configuracion/retencion: visor.
+  { ruta: '/retencion', etiqueta: 'Política de retención', icono: ShieldCheck, rolMinimo: 'visor' },
 ]
 
 /**

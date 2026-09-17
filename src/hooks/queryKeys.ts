@@ -12,6 +12,14 @@ export interface FiltrosListaWatchlist {
   activo: boolean
 }
 
+/** Filtros de GET /auditoria/consultas (todos opcionales en el contrato). */
+export interface FiltrosAuditoria {
+  usuarioId?: string
+  placa?: string
+  desde?: string
+  hasta?: string
+}
+
 export const qk = {
   detecciones: {
     todas: ['detecciones'] as const,
@@ -44,6 +52,14 @@ export const qk = {
     todas: ['watchlist'] as const,
     /** Conteo de la stat card del panel (activo=true, limite=200). */
     activas: ['watchlist', 'activas'] as const,
+    /** Todas las entradas activas (varias páginas) para cruzar una placa en campo (CU-12). */
+    activasCompleta: ['watchlist', 'activas', 'completa'] as const,
     lista: (f: FiltrosListaWatchlist) => ['watchlist', 'lista', f.motivo ?? 'todos', f.activo] as const,
+  },
+  auditoria: {
+    todas: ['auditoria'] as const,
+    /** Listado paginado por cursor (GET /auditoria/consultas). Sin polling: consulta administrativa. */
+    lista: (f: FiltrosAuditoria) =>
+      ['auditoria', 'lista', f.usuarioId ?? '', f.placa ?? '', f.desde ?? '', f.hasta ?? ''] as const,
   },
 }

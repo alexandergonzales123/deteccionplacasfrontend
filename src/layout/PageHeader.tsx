@@ -17,12 +17,13 @@ export function PageHeader({ titulo, subtitulo, enVivo = 'inactivo', acciones }:
   const ahora = useReloj(1000)
 
   return (
-    <header className="mb-6 flex items-start justify-between gap-6">
-      <div>
+    // En móvil se apila (título arriba, acciones y reloj debajo) para no desbordar a 375 px.
+    <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+      <div className="min-w-0">
         <h1 className="text-2xl font-bold tracking-tight text-fg">{titulo}</h1>
         {subtitulo ? <p className="mt-1 text-sm text-fgMuted">{subtitulo}</p> : null}
       </div>
-      <div className="flex shrink-0 items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4 sm:shrink-0 sm:justify-end">
         {acciones}
         {enVivo !== 'inactivo' ? (
           <span
@@ -42,7 +43,7 @@ export function PageHeader({ titulo, subtitulo, enVivo = 'inactivo', acciones }:
             {enVivo === 'ok' ? 'En vivo' : 'Sin conexión'}
           </span>
         ) : null}
-        <div className="text-right leading-tight">
+        <div className="leading-tight sm:text-right">
           <p className="font-mono text-sm font-semibold text-fg">{formatoHora(ahora)}</p>
           <p className="text-xs capitalize text-fgMuted">{formatoFechaLarga(ahora)}</p>
         </div>

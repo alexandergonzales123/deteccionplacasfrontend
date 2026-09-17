@@ -61,8 +61,10 @@ src/
   components/     ChipConfianza (semáforo de confianza), ChipMotivo (motivo de watchlist), BadgeEstadoAlerta,
                   EvidenciaDeteccion (imagen con bearer) y mapa/MapaAvistamientos (Leaflet, tema oscuro)
   hooks/          Hooks compartidos (alertas nuevas, reloj, imagen de detección) y claves de react-query
-  layout/         AppShell (sidebar + contenido), Sidebar, PageHeader, definición de la navegación
-  lib/            Utilidades puras: fechas, placas, confianza, frescura, watchlist (motivos, vencimiento), iniciales
+  layout/         AppShell (sidebar + contenido; en < md panel deslizante con hamburguesa), Sidebar, PageHeader,
+                  CampoShell (vista móvil sin sidebar), definición de la navegación
+  lib/            Utilidades puras: fechas, placas, confianza, frescura, watchlist (motivos, vencimiento), iniciales,
+                  auditoria (etiquetas de acción, motivo genérico, CSV), retencion (estado de purga, límites)
   pages/          Una carpeta o archivo por pantalla
     LoginPage.tsx
     panel/        Panel en vivo (CU-02)
@@ -70,7 +72,10 @@ src/
     camaras/      Listado, alta/edición/baja y detalle de cámaras (CU-07, CU-08, CU-09)
     watchlist/    Lista de vigilancia: alta, listado y retiro (CU-05)
     alertas/      Bandeja de alertas, detalle y atención (CU-06)
-    EnConstruccionPage.tsx, NoEncontradoPage.tsx
+    auditoria/    Registro de consultas, política de retención y su edición (CU-10, CU-11)
+    retencion/    Política de retención en solo lectura para cualquier rol (sección 8)
+    campo/        Consulta en campo, vista móvil (CU-12)
+    NoEncontradoPage.tsx
   router.tsx      Rutas y roles mínimos por pantalla
   main.tsx        Arranque: QueryClient, AuthProvider, RouterProvider
 ```
@@ -104,8 +109,9 @@ La jerarquía de roles del contrato es `visor < operador < supervisor < admin`. 
 | `/watchlist`          | operador   | CU-05        | Tabla paginada por cursor ("Cargar más"), polling 60 s; filtros `?motivo=` y `?activo=false` (retiradas). Alta en línea y retiro (baja lógica) solo supervisor+; el operador ve el aviso "Solo un supervisor puede agregar placas". Una misma placa puede figurar con varios motivos (1a); `venceEn` se envía en ISO o `null` y las entradas vencidas se marcan "Vencida" en cliente (3a, CA-07). La placa enlaza a `/busqueda?placa=` sin motivo (el operador lo declara allí). |
 | `/alertas`            | operador   | CU-06        | Pestañas `?estado=nueva\|revisada\|descartada\|todas` (por defecto Nuevas, con el contador del badge de la nav); rango `?desde`/`?hasta` opcional; cursor con "Cargar más". Polling 15 s solo en Nuevas. Cards con acciones: Ver evidencia, Descartar y Marcar revisada (modal con evidencia embebida, aviso R-05 y comentario obligatorio ≤500); Reabrir solo supervisor+ (3a, CA-13). Cada `PATCH` invalida `['alertas']` (lista, detalle y badge). |
 | `/alertas/:alertaId`  | operador   | CU-06        | Detalle con detección completa (OCR vs normalizada, `capturadaEn`/`recibidaEn`, cámara con enlace), evidencia embebida, mapa y las mismas acciones. 404 → "Alerta no encontrada". |
-
-Auditoría sigue como marcador de posición.
+| `/auditoria`          | admin      | CU-10, CU-11 | Selector de día (`?dia=`; por defecto hoy) que fija `desde`/`hasta` a 00:00:00–23:59:59 local; filtros `?usuarioId=` (uuid validado en cliente), `?placa=` (normalizada), `?desde`/`?hasta` (override). Cursor con "Cargar más"; sin polling. Filas con motivo genérico (heurística en `lib/auditoria.ts`, solo para acciones de consulta de placa) resaltadas en ámbar. "Exportar reporte" genera un CSV en cliente con los registros cargados (`auditoria-YYYY-MM-DD.csv`, RFC 4180, BOM UTF-8). Card de retención con estado de purga (al día < 36 h / atrasada / sin registro) y modal de edición con los mín/máx del contrato y confirmación explícita; el `PUT` invalida retención y auditoría. |
+| `/retencion`          | visor      | Sección 8    | La misma card de retención en solo lectura más un bloque de transparencia (finalidad, minimización, plazo, trazabilidad). Enlace al pie del sidebar para todos los roles. |
+| `/campo`              | operador   | CU-12        | Vista móvil fuera del `AppShell` (`CampoShell`): placa + motivo (chips rápidos que rellenan el motivo), inputs de 56 px y botón de ancho completo. Al pulsar Consultar: `GET /placas/buscar?difusa=false` + `GET /placas/{placa}/ubicacion-actual` + `GET /watchlist?activo=true` (cacheado 60 s) en paralelo. En vigilancia → bloque rojo dominante con motivo, expediente y notas de TODAS las entradas activas (3a) y aviso R-05; si no → verde "Sin vigilancia activa"; si no se pudo verificar → ámbar "Vigilancia no verificada" (nunca verde por omisión). "Última vez vista" siempre con "No equivale a su ubicación actual." (CU-04). Sin registros → botón "Buscar placas similares" (`difusa=true&distanciaMaxima=1`); elegir una rellena la placa sin re-consultar. |
 
 ### Supuestos y huecos del contrato (`TODO(contrato)`)
 
@@ -116,3 +122,7 @@ Auditoría sigue como marcador de posición.
 - No hay `GET /watchlist/{id}`: el detalle de alerta muestra `watchlistId` sin enlace.
 - El vencimiento del watchlist se calcula en cliente (`venceEn <= ahora`); el backend decide si esas entradas siguen con `activo=true`.
 - Los mapas usan tiles públicos de OpenStreetMap; en intranet hay que servir tiles propios (`TODO(despliegue)`).
+- No hay endpoint de exportación de auditoría aunque el enum incluya `exportacion`: el CSV se genera en cliente con lo cargado y, por tanto, esa exportación no queda auditada.
+- No hay endpoint de listado de usuarios: el filtro de auditoría recibe el `usuarioId` (uuid) escrito a mano.
+- No hay conteo agregado de auditoría: "Consultas de hoy" cuenta los registros cargados ("N+" si hay más páginas). La clasificación "motivo genérico" es una regex en cliente; el backend podría clasificarlo.
+- `CandidataPlaca` no trae motivo ni expediente de la vigilancia, y `/placas/buscar` solo devuelve placas con detecciones: la vista de campo cruza SIEMPRE `GET /watchlist?activo=true` (hasta 5 páginas de 200) por `placaNormalizada`. Lo ideal sería que `/placas/buscar` devolviera motivo y expediente.
