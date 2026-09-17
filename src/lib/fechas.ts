@@ -79,6 +79,11 @@ export function aDatetimeLocal(valor: Date): string {
   return format(valor, "yyyy-MM-dd'T'HH:mm")
 }
 
+/** Igual que `aDatetimeLocal` pero con segundos ("2026-09-16T23:59:59"); requiere `step={1}` en el input. */
+export function aDatetimeLocalSegundos(valor: Date): string {
+  return format(valor, "yyyy-MM-dd'T'HH:mm:ss")
+}
+
 /** Segundos transcurridos desde `valor` hasta `ahora`; null si la fecha es inválida. */
 export function segundosDesde(valor: string | number | Date | null | undefined, ahora: Date = new Date()): number | null {
   const d = aFecha(valor)

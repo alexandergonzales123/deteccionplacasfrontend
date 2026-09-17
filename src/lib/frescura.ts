@@ -17,6 +17,18 @@ export function frescuraDesdeSegundos(antiguedadSegundos: number): Frescura {
   return 'antiguo'
 }
 
+const FRESCURAS: readonly Frescura[] = ['reciente', 'probable', 'antiguo']
+
+/** Guarda contra un valor fuera del enum (backend desalineado) antes de indexar. */
+export function esFrescura(v: string | null | undefined): v is Frescura {
+  return v !== null && v !== undefined && (FRESCURAS as readonly string[]).includes(v)
+}
+
+/** Frescura del contrato si es válida; si no, se recalcula con los mismos umbrales. */
+export function frescuraSegura(frescura: string | null | undefined, antiguedadSegundos: number): Frescura {
+  return esFrescura(frescura) ? frescura : frescuraDesdeSegundos(antiguedadSegundos)
+}
+
 export interface EstiloFrescura {
   etiqueta: string
   descripcion: string

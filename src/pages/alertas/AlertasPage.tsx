@@ -177,7 +177,20 @@ export function AlertasPage() {
       ) : items.length === 0 ? (
         <Card>
           {lista.isError ? (
-            <EmptyState icono={BellOff} tono="error" titulo="No se pudieron cargar las alertas" descripcion="Se reintentará automáticamente." />
+            // Solo la pestaña Nuevas tiene polling; en las demás el reintento es manual.
+            <EmptyState
+              icono={BellOff}
+              tono="error"
+              titulo="No se pudieron cargar las alertas"
+              descripcion={pestana === 'nueva' ? 'Se reintentará automáticamente.' : 'Vuelva a intentarlo.'}
+              accion={
+                pestana !== 'nueva' ? (
+                  <Button variante="secundario" className="min-h-[44px]" onClick={() => void lista.refetch()} cargando={lista.isFetching}>
+                    Reintentar
+                  </Button>
+                ) : undefined
+              }
+            />
           ) : (
             <EmptyState
               icono={pestana === 'nueva' ? Bell : BellOff}
