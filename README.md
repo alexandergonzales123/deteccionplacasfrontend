@@ -26,6 +26,23 @@ Comandos disponibles:
 | `npm run preview`   | Sirve el build de producción localmente                     |
 | `npm run lint`      | ESLint sobre todo el proyecto                               |
 | `npm run typecheck` | Solo verificación de tipos, sin generar build               |
+| `npm run mock`      | Mock del contrato en `localhost:8000` para revisar la UI    |
+
+### Revisar la interfaz sin backend
+
+`mock/api.mjs` implementa todos los endpoints del contrato con datos en memoria
+(cámaras de Lima, tránsito simulado que genera detecciones cada pocos segundos,
+watchlist, alertas, auditoría y retención). Es solo para revisión visual; no
+sustituye al backend.
+
+```bash
+npm run mock    # terminal 1 · http://localhost:8000/api/v1
+npm run dev     # terminal 2 · http://localhost:5173
+```
+
+Usuarios (contraseña `centinela`): `admin@`, `supervisor@`, `operador@` y
+`visor@munidemo.gob.pe`. La placa `AKQ-198` tiene un recorrido de 4 puntos y
+está en el watchlist; `AKO-198` sirve para probar la búsqueda difusa.
 
 ## Variables de entorno
 
